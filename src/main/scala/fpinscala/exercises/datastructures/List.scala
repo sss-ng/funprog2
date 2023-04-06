@@ -5,7 +5,7 @@ enum List[+A]:
   /** A `List` data constructor representing the empty list. */
   case Nil
 
-  /** Another data constructor, representing nonempty lists. Note that `tail` is
+  /** Another data constructor, representing nonempty lists. Note that `xs` is
     * another `List[A]`, which may be `Nil` or another `Cons`.
     */
   case Cons(head: A, tail: List[A])
@@ -57,38 +57,53 @@ object List: // `List` companion object. Contains functions for creating and wor
     case Cons(x, xs) => xs
 
   def setHead[A](l: List[A], h: A): List[A] = l match
-    case Nil              => sys.error("cannot set head of Nil list")
-    case Cons(head, tail) => Cons(h, tail)
+    case Nil         => sys.error("cannot set head of Nil list")
+    case Cons(x, xs) => Cons(h, xs)
 
   def drop[A](l: List[A], n: Int): List[A] = l match
-    case Nil              => Nil
-    case Cons(head, tail) => if n > 0 then drop(tail, n - 1) else l
+    case Nil         => Nil
+    case Cons(x, xs) => if n > 0 then drop(xs, n - 1) else l
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match
-    case Nil              => Nil
-    case Cons(head, tail) => if f(head) then dropWhile(tail, f) else l
+    case Nil         => Nil
+    case Cons(x, xs) => if f(x) then dropWhile(xs, f) else l
 
   // you must always traverse the entire list
   def init[A](l: List[A]): List[A] = l match
-    case Nil              => Nil
-    case Cons(_, Nil)     => Nil
-    case Cons(head, tail) => Cons(head, init(tail))
+    case Nil          => sys.error("cannot call init on Nil list")
+    case Cons(_, Nil) => Nil
+    case Cons(x, xs)  => Cons(x, init(xs))
 
-  def length[A](l: List[A]): Int = ???
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0, (a, b) => 1 + b)
 
-  def foldLeft[A, B](l: List[A], acc: B, f: (B, A) => B): B = ???
+  def foldLeft[A, B](l: List[A], acc: B, f: (B, A) => B): B = l match
+    case Nil         => acc
+    case Cons(x, xs) => foldLeft(xs, f(acc, x), f)
 
-  def sumViaFoldLeft(ns: List[Int]): Int = ???
+  def sumViaFoldLeft(ns: List[Int]): Int =
+    foldLeft(ns, 0, (b, a) => a + b)
 
-  def productViaFoldLeft(ns: List[Double]): Double = ???
+  def productViaFoldLeft(ns: List[Double]): Double =
+    foldLeft(ns, 1, (b, a) => a * b)
 
-  def lengthViaFoldLeft[A](l: List[A]): Int = ???
+  def lengthViaFoldLeft[A](l: List[A]): Int =
+    foldLeft(l, 0, (b, a) => 1 + b)
 
-  def reverse[A](l: List[A]): List[A] = ???
+  def reverse[A](l: List[A]): List[A] =
+    foldLeft(l, Nil: List[A], (b, a) => Cons(a, b))
 
-  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] = ???
+  def foldLeftViaFoldRight[A, B](l: List[A], acc: B, f: (B, A) => B): B =
+    ???
 
-  def concat[A](l: List[List[A]]): List[A] = ???
+  def foldRightViaFoldLeft[A, B](l: List[A], acc: B, f: (A, B) => B): B =
+    ???
+
+  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] =
+    foldRight(l, r, (a, b) => Cons(a, b))
+
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, Nil: List[A], (a, b) => append(a, b))
 
   def incrementEach(l: List[Int]): List[Int] = ???
 
