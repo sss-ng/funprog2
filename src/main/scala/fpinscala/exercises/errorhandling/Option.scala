@@ -2,6 +2,7 @@ package fpinscala.exercises.errorhandling
 
 // Hide std library `Option` since we are writing our own in this chapter
 import scala.{Option as _, Some as _, None as _}
+import scala.collection.immutable.Nil
 
 enum Option[+A]:
   case Some(get: A)
@@ -63,6 +64,9 @@ object Option:
 
   def sequence[A](as: List[Option[A]]): Option[List[A]] =
     traverse(as)(a => a)
+    // as match
+    //   case head :: tail => head.flatMap(h => sequence(tail).map(l => h :: l))
+    //   case Nil          => Some(Nil)
 
   def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] =
     as.foldRight(Some(List[B]()))((curr, prev) =>
